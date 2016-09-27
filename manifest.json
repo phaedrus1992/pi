@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+
+  "name": "Negative Risk Extension",
+  "description": "This extension will display whether it is a good time to purchase shares with negative risk.",
+  "version": "0.1",
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.predictit.org/Market/*"],
+      "js": ["jquery-3.1.1.slim.min.js", "predictit.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": [
+    "activeTab",
+    "https://www.predictit.org/"
+  ]
+}
