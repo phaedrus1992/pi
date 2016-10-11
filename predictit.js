@@ -1,14 +1,42 @@
 (function (w) {
 	var retries = 4;
+	var default_options = {
+		negativerisk_maxprice: 97,
+		negativerisk_refresh: 10
+	};
 
-	function calculate() {
+	function updateAnnotation(icon, mouseover) {
+		var sharesHeader = $('#contractListTable .sharesHeader');
+		var riskAnnotation = sharesHeader.find('.risk-annotation');
+		if (!riskAnnotation || riskAnnotation.length == 0) {
+			sharesHeader.find('a.glyphicons').after('<span class="risk-annotation" style="cursor: pointer" title="' + mouseover + '">' + icon + '</span>');
+		} else {
+			riskAnnotation.html('&nbsp;' + icon + '&nbsp;');
+			riskAnnotation.attr('title', mouseover);
+		}
+
+		$('#contractListTable .sharesHeader a.glyphicons.refresh').click(function() {
+			retries = 4;
+			setTimeout(update, 2000);
+		});
+	}
+
+	function update() {
+		chrome.storage.sync.get(default_options, function(items) {
+			calculate(items.negativerisk_maxprice);
+		});
+	}
+
+	function calculate(max) {
+		console.log('Calculating negative risk.  Max acceptable price: ' + max + '¢');
+
 		// Get the prices of each "No" option.
 		var noList = $('#contractListTable .sharesDown > .sharesDown').filter(function(index, item) {
 			// only get the "buy"s
 			return item.id.indexOf("buy") === 0;
 		}).text().split('¢').filter(function(item) {
-			// Filter out options not currently traded, or costing more than $0.97.
-			return !(item === '' || item.indexOf('None') > -1 || item >= 98); 
+			// Filter out options not currently traded, or costing more than <max>.
+			return !(item === '' || item.indexOf('None') > -1 || item > max); 
 		}).map(function (item, idx) {
 			// normalize to dollars
 			return parseInt(item) / 100.0;
@@ -21,13 +49,14 @@
 
 		if (noList.length === 0) {
 			console.log('Not finished loading, retrying in 2 seconds.');
-			setTimeout(calculate, 2000);
+			setTimeout(update, 2000);
 			retries--;
 			return;
 		}
 
-		if (noList.length < 3) {
-			console.log('Not a linked market.');
+		if (noList.length < 2) {
+			console.log('Too few markets.');
+			updateAnnotation('❓', 'Too few markets ' + max + '¢ or under to calculate negative risk.');
 			retries = 0;
 			return;
 		}
@@ -92,21 +121,17 @@
 		}
 
 		console.log(text);
+		updateAnnotation(icon, mouseover);
 
-		var sharesHeader = $('#contractListTable .sharesHeader');
-		var riskAnnotation = sharesHeader.find('.risk-annotation');
-		if (!riskAnnotation || riskAnnotation.length == 0) {
-			sharesHeader.find('a.glyphicons').after('<span class="risk-annotation" style="cursor: pointer" title="' + mouseover + '">' + icon + '</span>');
-		} else {
-			riskAnnotation.html(icon);
-			riskAnnotation.attr('title', mouseover);
-		}
-
-		$('#contractListTable .sharesHeader a.glyphicons.refresh').click(function() {
-			retries = 4;
-			setTimeout(calculate, 2000);
+		chrome.storage.sync.get(default_options, function(items) {
+			var refreshTime = parseInt(items.negativerisk_refresh, 10);
+			if (!refreshTime || isNaN(refreshTime)) {
+				refreshTime = 10;
+			}
+			console.log('Refreshing again in ' + refreshTime + ' seconds.');
+			setTimeout(update, refreshTime * 1000);
 		});
 	}
 
-	setTimeout(calculate, 2000);
+	setTimeout(update, 2000);
 })(window);

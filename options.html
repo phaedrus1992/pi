@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Negative Risk Plugin Options</title>
+  <style>
+    body: {
+      padding: 10px;
+    }
+    label: {
+      display: inline-block;
+    }
+    label, span, input[type="range"] {
+      vertical-align: middle;
+    }
+    input[type="range"] {
+      margin: 5px;
+    }
+    button#save {
+      right: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <label for="maxprice">Ignore markets over:</label>
+  <input type="range" min="1" max="99" id="maxprice" name="maxprice">
+  <span id="maxpriceDisplay"></span>&cent;
+
+  <br>
+
+  <label for="refresh">Auto-refresh every:&nbsp;&nbsp;</label>
+  <input type="range" min="5" max="60" id="refresh" name="refresh">
+  <span id="refreshDisplay"></span> seconds
+
+  <br><br>
+
+  <button id="save">Save</button>
+  <button id="reset">Defaults</button>
+  <span id="status"></span>
+
+  <script src="options.js"></script>
+</body>
+</html>
