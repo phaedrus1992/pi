@@ -17,6 +17,11 @@ Installation
 Version History
 ===============
 
+0.2.1
+-----
+
+* Fix a memory leak in the refresh code that would cause PredictIt pages to slow down over time.
+
 0.2
 ---
 * Automatically re-calculate (refresh) every X seconds.

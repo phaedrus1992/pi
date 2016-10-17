@@ -1,8 +1,19 @@
 (function (w) {
 	var retries = 4;
+	var schedule;
 	var default_options = {
 		negativerisk_maxprice: 97,
 		negativerisk_refresh: 10
+	};
+
+	function scheduleUpdate(wait) {
+		if (schedule) {
+			clearTimeout(schedule);
+			schedule = null;
+		}
+		schedule = (function(time) {
+			return setTimeout(update, time);
+		})(wait);
 	};
 
 	function updateAnnotation(icon, mouseover) {
@@ -17,7 +28,7 @@
 
 		$('#contractListTable .sharesHeader a.glyphicons.refresh').click(function() {
 			retries = 4;
-			setTimeout(update, 2000);
+			scheduleUpdate(2000);
 		});
 	}
 
@@ -49,7 +60,7 @@
 
 		if (noList.length === 0) {
 			console.log('Not finished loading, retrying in 2 seconds.');
-			setTimeout(update, 2000);
+			scheduleUpdate(2000);
 			retries--;
 			return;
 		}
@@ -129,9 +140,9 @@
 				refreshTime = 10;
 			}
 			console.log('Refreshing again in ' + refreshTime + ' seconds.');
-			setTimeout(update, refreshTime * 1000);
+			scheduleUpdate(refreshTime * 1000);
 		});
 	}
 
-	setTimeout(update, 2000);
+	scheduleUpdate(2000);
 })(window);
