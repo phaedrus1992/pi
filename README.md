@@ -3,7 +3,16 @@ Negative Risk Annotation Plugin for Chrome
 
 This Chrome extension adds an annotation to linked markets on PredictIt to tell you if they are a good candidate for negative risk purchasing.  NOTE: by default, this extension ignores individual trades selling for more than 97¢.  To change this, see the "Options" in the extension.
 
-![PredictIt Linked Market Example](linked-market-example.png)
+Screenshots
+===========
+
+Default:
+
+  <img src="linked-market-example.png" width="321.5" height="153.5" title="Default Linked Market Example">
+
+Detailed:
+
+  <img src="linked-market-example-detailed.png" width="768" height="113" title="Detailed Linked Market Example">
 
 Installation
 ============
