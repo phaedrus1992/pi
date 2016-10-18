@@ -28,17 +28,17 @@ function update_ui() {
 
 function restore_options() {
 	console.log('restore_options()');
-	chrome.storage.sync.get(default_options, function(items) {
-		document.getElementById('maxprice').value = items.negativerisk_maxprice;
-		document.getElementById('refresh').value = items.negativerisk_refresh;
-		document.getElementById('great').value = items.negativerisk_great;
-		document.getElementById('detailed').checked = items.negativerisk_detailed;
-		document.getElementById('yesrisk').checked = items.negativerisk_yesrisk;
-		console.log('restore_options: maxprice=' + items.negativerisk_maxprice);
-		console.log('restore_options: refresh=' + items.negativerisk_refresh);
-		console.log('restore_options: great=' + items.negativerisk_great);
-		console.log('restore_options: detailed=' + items.negativerisk_detailed);
-		console.log('restore_options: yesrisk=' + items.negativerisk_yesrisk);
+	chrome.storage.sync.get(default_options || {}, function(options) {
+		document.getElementById('maxprice').value = options.negativerisk_maxprice;
+		document.getElementById('refresh').value = options.negativerisk_refresh;
+		document.getElementById('great').value = options.negativerisk_great;
+		document.getElementById('detailed').checked = options.negativerisk_detailed;
+		document.getElementById('yesrisk').checked = options.negativerisk_yesrisk;
+		console.log('restore_options: maxprice=' + options.negativerisk_maxprice);
+		console.log('restore_options: refresh=' + options.negativerisk_refresh);
+		console.log('restore_options: great=' + options.negativerisk_great);
+		console.log('restore_options: detailed=' + options.negativerisk_detailed);
+		console.log('restore_options: yesrisk=' + options.negativerisk_yesrisk);
 		update_ui();
 	});
 }

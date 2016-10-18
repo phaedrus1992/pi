@@ -20,7 +20,7 @@ Version History
 0.3
 ---
 
-* New emoji for especially good deals. (Including an option for configuring the threshold for "Great Bet.")
+* New emoji for especially good deals. (including an option for configuring the threshold for "Great")
 * Spacing/layout fix for icon on first display.
 * "Detailed" view which will show the icon + gain/loss numbers directly in the PredictIt view.
 * Support for calculating negative risk from "Yes" purchases. (You must enable this in the options.)

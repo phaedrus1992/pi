@@ -17,6 +17,7 @@
 	const STATUSES = {
 		unknown: {
 			icon: '❓',
+			bgcolor: '#777',
 			label: 'Unknown',
 			instruction: "Don't Buy",
 			lowLabel: 'Lowest Potential Loss',
@@ -24,6 +25,7 @@
 		},
 		awful: {
 			icon: '💩',
+			bgcolor: '#bdb58e',
 			label: 'Awful',
 			instruction: "Don't Buy",
 			lowLabel: 'Lowest Potential Loss',
@@ -31,6 +33,7 @@
 		},
 		bad: {
 			icon: '❌',
+			bgcolor: '#fdd',
 			label: 'Bad',
 			instruction: "Don't Buy",
 			lowLabel: 'Lowest Potential Loss',
@@ -38,6 +41,7 @@
 		},
 		mixed: {
 			icon: '😐',
+			bgcolor: 'white',
 			label: 'Mixed',
 			instruction: "Don't Buy",
 			lowLabel: 'Lowest Potential Loss',
@@ -45,6 +49,7 @@
 		},
 		good: {
 			icon: '✅',
+			bgcolor: '#93d591',
 			label: 'Good',
 			instruction: "Buy",
 			lowLabel: 'Lowest Potential Gain',
@@ -52,6 +57,7 @@
 		},
 		great: {
 			icon: '🤑',
+			bgcolor: '#6dd56a',
 			label: 'Great',
 			instruction: "Buy",
 			lowLabel: 'Lowest Potential Gain',
@@ -75,14 +81,14 @@
 	};
 
 	function assertInjectionComplete(callback) {
-		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+		chrome.storage.sync.get(default_options || {}, function(options) {
 			var headerAnnotation = $('#headerAnnotation');
 			var detailedAnnotation = $('#detailedAnnotation');
 
 			if (options.negativerisk_detailed) {
 				headerAnnotation.remove();
 				if (!detailedAnnotation || detailedAnnotation.length === 0) {
-					$('#contractList div.panel.panel-default.activity').before('<div id="detailedAnnotation"><span id="detailedYes" /> <span id="detailedNo" /></div>');
+					$('#contractList div.panel.panel-default.activity').parent().before('<table id="detailedAnnotation"><tr><td id="detailedYes"></td><td>&nbsp;&nbsp;</td><td id="detailedNo"></td></tr></table>');
 				}
 			} else {
 				detailedAnnotation.remove();
@@ -117,7 +123,7 @@
 	}
 
 	function updateAnnotation(info, callback) {
-		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+		chrome.storage.sync.get(default_options || {}, function(options) {
 			if (!options.negativerisk_yesrisk && info.type === 'yes') {
 				console.log('Skipping "Yes" negative risk update.');
 				$('#headerYes').html('');
@@ -144,11 +150,11 @@
 			var typeDisplay = info.type.charAt(0).toUpperCase() + info.type.slice(1).toLowerCase();
 			var el = $('#header' + typeDisplay);
 
-			el.html('&nbsp;' + colorize(info.type, typeDisplay) + ':&nbsp;' + info.status.icon + '&nbsp;');
+			el.html('&nbsp;<span style="color:#777">' + typeDisplay + ':</span>&nbsp;' + info.status.icon + '&nbsp;');
 
 			var mouseover = info.status.instruction + ' ' + typeDisplay + '\n';
-			mouseover += info.status.lowLabel + ': ' + info.low + '\n';
-			mouseover += info.status.highLabel + ': ' + info.high + '\n';
+			mouseover += info.status.lowLabel + ': ' + info.low + '%\n';
+			mouseover += info.status.highLabel + ': ' + info.high + '%';
 
 			el.attr('title', mouseover);
 		});
@@ -159,20 +165,25 @@
 		assertInjectionComplete(function() {
 			var typeDisplay = info.type.charAt(0).toUpperCase() + info.type.slice(1).toLowerCase();
 			var el = $('#detailed' + typeDisplay);
-			var text ='';
 
-			text += info.status.lowLabel + ': ' + info.low + '\n';
-			text += info.status.highLabel + ': ' + info.high + '\n';
-			var detail = '<span style="float: left; font-size: 200%; padding-right: 0.5em; width: 250px">' +
-				colorize(info.type, info.status.icon + ' ' + info.status.instruction + ' ' + typeDisplay) +
-				'</span><p style="white-space: pre-wrap; display: inline">' + colorize(info.type, text) + '</p>';
+			var detail = '<table style="border:0;margin:0 5px;background-color:' + info.status.bgcolor + '">' +
+				'<tr>' +
+					'<td rowspan="2" style="font-size:150%;padding:1px 8px">' + info.status.icon + ' ' + info.status.instruction + ' ' + colorize(info.type, typeDisplay) + '</td>' +
+					'<td style="padding:1px 5px">' + info.status.lowLabel + ':' + '</td>' +
+					'<td style="padding:1px 5px;text-align:right">' + info.low + '%</td>' +
+				'</tr>' +
+				'<tr>' +
+					'<td style="padding:1px 5px">' + info.status.highLabel + ':' + '</td>' +
+					'<td style="padding:1px 5px;text-align:right">' + info.high + '%</td>' +
+				'</tr>' +
+			'</table>';
 
 			el.html(detail);
 		});
 	}
 
 	function update(callback) {
-		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+		chrome.storage.sync.get(default_options || {}, function(options) {
 			calculate(options.negativerisk_maxprice, options.negativerisk_great);
 			if (callback) { callback(options); }
 		});
@@ -380,7 +391,7 @@
 			high: highestPotentialPercent
 		});
 
-		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+		chrome.storage.sync.get(default_options || {}, function(options) {
 			var refreshTime = parseInt(options.negativerisk_refresh, 10);
 			if (!refreshTime || isNaN(refreshTime)) {
 				refreshTime = 10;
