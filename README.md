@@ -65,6 +65,11 @@ Browse to any linked Market page on PredictIt.  You will see one of three marker
 
 Hover your mouse over the icon to see the potential gain or loss.
 
+```diff
+- NOTE: These calculations are likely not correct in markets that can resolve "none of the above."
+- Always double-check the market before purchasing based on this plugin.
+```
+
 Disclaimer
 ==========
 
