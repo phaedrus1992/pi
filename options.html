@@ -6,14 +6,22 @@
     body: {
       padding: 10px;
     }
+    table: {
+      border: none;
+      margin-bottom: 10px;
+    }
     label: {
       display: inline-block;
     }
     label, span, input[type="range"] {
       vertical-align: middle;
     }
-    input[type="range"] {
+    input {
       margin: 5px;
+      /*width: 200px; */
+    }
+    input[type="checkbox"] {
+      margin-left: 5px;
     }
     button#save {
       right: 0;
@@ -22,17 +30,43 @@
 </head>
 
 <body>
-  <label for="maxprice">Ignore markets over:</label>
-  <input type="range" min="1" max="99" id="maxprice" name="maxprice">
-  <span id="maxpriceDisplay"></span>&cent;
-
-  <br>
-
-  <label for="refresh">Auto-refresh every:&nbsp;&nbsp;</label>
-  <input type="range" min="5" max="60" id="refresh" name="refresh">
-  <span id="refreshDisplay"></span> seconds
-
-  <br><br>
+  <table>
+    <tr>
+      <td class="label">
+        <label for="detailed">Show Detailed Display:</label>
+      </td>
+      <td class="input">
+        <input type="checkbox" id="detailed" name="detailed">
+      </td>
+    </tr>
+    <tr>
+      <td class="label">
+        <label for="maxprice">Minimum gain considered "Great":</label>
+      </td>
+      <td class="input">
+        <input type="range" step="1" min="0" max="100" id="great" name="great">
+        <span id="greatDisplay"></span>%
+      </td>
+    </tr>
+    <tr>
+      <td class="label">
+        <label for="maxprice">Ignore markets over:</label>
+      </td>
+      <td class="input">
+        <input type="range" min="1" max="99" id="maxprice" name="maxprice">
+        <span id="maxpriceDisplay"></span>&cent;
+      </td>
+    </tr>
+    <tr>
+      <td class="label">
+        <label for="refresh">Auto-refresh every:&nbsp;&nbsp;</label>
+      </td>
+      <td class="input">
+        <input type="range" min="5" max="60" id="refresh" name="refresh">
+        <span id="refreshDisplay"></span> seconds
+      </td>
+    </tr>
+  </table>
 
   <button id="save">Save</button>
   <button id="reset">Defaults</button>
