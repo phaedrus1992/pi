@@ -23,6 +23,7 @@ Version History
 * New emoji for especially good deals. (Including an option for configuring the threshold for "Great Bet.")
 * Spacing/layout fix for icon on first display.
 * "Detailed" view which will show the icon + gain/loss numbers directly in the PredictIt view.
+* Support for calculating negative risk from "Yes" purchases. (You must enable this in the options.)
 
 0.2.1
 -----
@@ -49,9 +50,9 @@ Browse to any linked Market page on PredictIt.  You will see one of three marker
 
 * ❓ = Too few markets to calculate negative risk.
 * ❌ = Bad Bet (there is no potential to make money by buying all shares)
-* 😐 = Mixed Bet (it is possible to win or lose money depending on the outcome)
+* 😐 = Mixed Bet (it is possible to gain or lose money depending on the outcome)
 * ✅ = Good Bet (no matter the outcome, you should make money)
-* 🤑 = Great Bet (at least 5% return)
+* 🤑 = Great Bet (based on a configurable threshold)
 
 Hover your mouse over the icon to see the potential gain or loss.
 

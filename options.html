@@ -41,7 +41,15 @@
     </tr>
     <tr>
       <td class="label">
-        <label for="maxprice">Minimum gain considered "Great":</label>
+        <label for="detailed">Include "Yes" Negative Risk:</label>
+      </td>
+      <td class="input">
+        <input type="checkbox" id="yesrisk" name="yesrisk">
+      </td>
+    </tr>
+    <tr>
+      <td class="label">
+        <label for="maxprice">"Great" gain threshold:</label>
       </td>
       <td class="input">
         <input type="range" step="1" min="0" max="100" id="great" name="great">
@@ -59,11 +67,11 @@
     </tr>
     <tr>
       <td class="label">
-        <label for="refresh">Auto-refresh every:&nbsp;&nbsp;</label>
+        <label for="refresh">Recalculate every:&nbsp;&nbsp;</label>
       </td>
       <td class="input">
         <input type="range" min="5" max="60" id="refresh" name="refresh">
-        <span id="refreshDisplay"></span> seconds
+        <span id="refreshDisplay"></span>s
       </td>
     </tr>
   </table>

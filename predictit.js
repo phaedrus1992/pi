@@ -3,9 +3,60 @@
 	var schedule;
 	var default_options = {
 		negativerisk_detailed: false,
+		negativerisk_yesrisk: false,
 		negativerisk_maxprice: 97,
 		negativerisk_refresh: 10,
 		negativerisk_great: 5,
+	};
+
+	const COLORS = {
+		no: 'red',
+		yes: 'green'
+	};
+
+	const STATUSES = {
+		unknown: {
+			icon: '❓',
+			label: 'Unknown',
+			instruction: "Don't Buy",
+			lowLabel: 'Lowest Potential Loss',
+			highLabel: 'Highest Potential Loss'
+		},
+		awful: {
+			icon: '💩',
+			label: 'Awful',
+			instruction: "Don't Buy",
+			lowLabel: 'Lowest Potential Loss',
+			highLabel: 'Highest Potential Loss'
+		},
+		bad: {
+			icon: '❌',
+			label: 'Bad',
+			instruction: "Don't Buy",
+			lowLabel: 'Lowest Potential Loss',
+			highLabel: 'Highest Potential Loss'
+		},
+		mixed: {
+			icon: '😐',
+			label: 'Mixed',
+			instruction: "Don't Buy",
+			lowLabel: 'Lowest Potential Loss',
+			highLabel: 'Highest Potential Gain'
+		},
+		good: {
+			icon: '✅',
+			label: 'Good',
+			instruction: "Buy",
+			lowLabel: 'Lowest Potential Gain',
+			highLabel: 'Highest Potential Gain'
+		},
+		great: {
+			icon: '🤑',
+			label: 'Great',
+			instruction: "Buy",
+			lowLabel: 'Lowest Potential Gain',
+			highLabel: 'Highest Potential Gain'
+		}
 	};
 
 	function scheduleUpdate(wait) {
@@ -18,77 +69,171 @@
 		})(wait);
 	}
 
-	function updateAnnotation(icon, mouseover, label, text) {
-		chrome.storage.sync.get(default_options? default_options : {}, function(items) {
-			if (items.negativerisk_detailed) {
-				updateDetailedAnnotation(icon, mouseover, label, text);
+	function scheduleRefresh() {
+		retries = 4;
+		scheduleUpdate(2000);
+	};
+
+	function assertInjectionComplete(callback) {
+		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+			var headerAnnotation = $('#headerAnnotation');
+			var detailedAnnotation = $('#detailedAnnotation');
+
+			if (options.negativerisk_detailed) {
+				headerAnnotation.remove();
+				if (!detailedAnnotation || detailedAnnotation.length === 0) {
+					$('#contractList div.panel.panel-default.activity').before('<div id="detailedAnnotation"><span id="detailedYes" /> <span id="detailedNo" /></div>');
+				}
 			} else {
-				updateHeaderAnnotation(icon, mouseover, label, text);
+				detailedAnnotation.remove();
+				var sharesHeader = $('#contractListTable .sharesHeader');
+				if (!headerAnnotation || headerAnnotation.length === 0) {
+					sharesHeader.find('a.glyphicons').after('<span id="headerAnnotation" style="cursor: pointer"><span id="headerYes" /> <span id="headerNo" /></span>');
+				}
 			}
+
+			var refreshElement = $('#contractListTable .sharesHeader a.glyphicons.refresh');
+			if (refreshElement && refreshElement.length > 0) {
+				var exists = false;
+				var events = $._data(refreshElement[0], 'events');
+				if (events && events.click) {
+					$.each(events.click, function(index, ev) {
+						if (ev.handler === scheduleRefresh) {
+							exists = true;
+						}
+					});
+				}
+
+				if (exists) {
+					console.log('refresh is already captured');
+				} else {
+					console.log('capturing refresh button');
+					refreshElement.click(scheduleRefresh);
+				}
+			}
+
+			if (callback) { callback(options); }
 		});
 	}
 
-	function updateHeaderAnnotation(icon, mouseover, label, text) {
-		var sharesHeader = $('#contractListTable .sharesHeader');
-		var riskAnnotation = sharesHeader.find('#riskAnnotation');
-		if (!riskAnnotation || riskAnnotation.length === 0) {
-			sharesHeader.find('a.glyphicons').after('<span id="riskAnnotation" style="cursor: pointer" title="' + mouseover + '">&nbsp;' + icon + '&nbsp;</span>');
-		} else {
-			riskAnnotation.html('&nbsp;' + icon + '&nbsp;');
-			riskAnnotation.attr('title', mouseover);
-		}
-		$('#riskDetails').remove();
-
-		$('#contractListTable .sharesHeader a.glyphicons.refresh').click(function() {
-			retries = 4;
-			scheduleUpdate(2000);
+	function updateAnnotation(info, callback) {
+		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+			if (!options.negativerisk_yesrisk && info.type === 'yes') {
+				console.log('Skipping "Yes" negative risk update.');
+				$('#headerYes').html('');
+				$('#detailedYes').html('');
+			} else {
+				info.options = options;
+				if (options.negativerisk_detailed) {
+					updateDetailedAnnotation(info);
+				} else {
+					updateHeaderAnnotation(info);
+				}
+			}
+			if (callback) { callback(options); }
 		});
 	}
 
-	function updateDetailedAnnotation(icon, mouseover, label, text) {
-		var detailedAnnotation = $('#riskDetails');
-		var detail = mouseover.replace(/\n/g, '<br>');
-		detail = '<span style="float: left; font-size: 200%; padding-right: 0.5em">' + icon + ' ' + label + '</span><p style="white-space: pre-wrap; display: inline">' + detail + '</p>';
-		if (!detailedAnnotation || detailedAnnotation.length === 0) {
-			$('#contractList div.panel.panel-default.activity').before('<div id="riskDetails">' + detail + '</div>')
-		} else {
-			detailedAnnotation.html(detail);
-		}
-		$('#riskAnnotation').remove();
+	function colorize(type, text) {
+		return '<span style="color:' + COLORS[type] + '">' + text + '</span>';
+	}
 
-		$('#contractListTable .sharesHeader a.glyphicons.refresh').click(function() {
-			retries = 4;
-			scheduleUpdate(2000);
+	function updateHeaderAnnotation(info) {
+		//console.log('updateHeaderAnnotation:',info);
+		assertInjectionComplete(function() {
+			var typeDisplay = info.type.charAt(0).toUpperCase() + info.type.slice(1).toLowerCase();
+			var el = $('#header' + typeDisplay);
+
+			el.html('&nbsp;' + colorize(info.type, typeDisplay) + ':&nbsp;' + info.status.icon + '&nbsp;');
+
+			var mouseover = info.status.instruction + ' ' + typeDisplay + '\n';
+			mouseover += info.status.lowLabel + ': ' + info.low + '\n';
+			mouseover += info.status.highLabel + ': ' + info.high + '\n';
+
+			el.attr('title', mouseover);
 		});
 	}
 
-	function update() {
-		chrome.storage.sync.get(default_options? default_options : {}, function(items) {
-			calculate(items.negativerisk_maxprice, items.negativerisk_great);
+	function updateDetailedAnnotation(info) {
+		//console.log('updateDetailedAnnotation:',info);
+		assertInjectionComplete(function() {
+			var typeDisplay = info.type.charAt(0).toUpperCase() + info.type.slice(1).toLowerCase();
+			var el = $('#detailed' + typeDisplay);
+			var text ='';
+
+			text += info.status.lowLabel + ': ' + info.low + '\n';
+			text += info.status.highLabel + ': ' + info.high + '\n';
+			var detail = '<span style="float: left; font-size: 200%; padding-right: 0.5em; width: 250px">' +
+				colorize(info.type, info.status.icon + ' ' + info.status.instruction + ' ' + typeDisplay) +
+				'</span><p style="white-space: pre-wrap; display: inline">' + colorize(info.type, text) + '</p>';
+
+			el.html(detail);
+		});
+	}
+
+	function update(callback) {
+		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+			calculate(options.negativerisk_maxprice, options.negativerisk_great);
+			if (callback) { callback(options); }
 		});
 	}
 
 	function calculate(max, great) {
 		console.log('Calculating negative risk.  Max acceptable price: ' + max + '¢');
 
-		// Get the prices of each "No" option.
-		var noList = $('#contractListTable .sharesDown > .sharesDown').filter(function(index, item) {
-			// only get the "buy"s
-			return item.id.indexOf("buy") === 0;
-		}).text().split('¢').filter(function(item) {
-			// Filter out options not currently traded, or costing more than <max>.
-			return !(item === '' || item.indexOf('None') > -1 || item > max); 
-		}).map(function (item, idx) {
-			// normalize to dollars
-			return parseInt(item) / 100.0;
+		var yeses = [];
+		var nos = [];
+
+		var rows = $('#contractListTable tr');
+		rows.each(function(index, el) {
+			var up = $(el).find('span.sharesUp').first();
+			var down = $(el).find('span.sharesDown').first();
+			var price;
+
+			var upa = $(up).find('a.sharesUp');
+			if (upa && upa.length) {
+				price = parseInt(upa.text().split('¢')[0],10);
+			} else {
+				price = parseInt(up.text().split('¢')[0],10);
+			}
+			if (!isNaN(price) && price <= max) {
+				yeses.push(price);
+				console.log('yes: ' + price);
+			} else {
+				console.log('yes did not match: ' + price);
+			}
+
+			var downa = $(down).find('a.sharesDown');
+			if (downa && downa.length) {
+				price = parseInt(downa.text().split('¢')[0],10);
+			} else {
+				price = parseInt(down.text().split('¢')[0],10);
+			}
+			if (!isNaN(price) && price <= max) {
+				nos.push(price);
+				console.log('no: ' + price);
+			} else {
+				console.log('no did not match: ' + price);
+			}
+
 		});
+
+		var yesList = yeses.map(function(item) {
+			return item / 100.0;
+		});
+		var noList = nos.map(function(item) {
+			return item / 100.0;
+		});
+
+		//console.log('YESes: ' , yesList);
+		//console.log('NOs: ', noList);
 
 		if (retries === 0) {
 			console.log('Out of retries.  Giving up.');
 			return;
 		}		
 
-		if (noList.length === 0) {
+		if (noList.length === 0 && yesList.length === 0) {
 			console.log('Not finished loading, retrying in 2 seconds.');
 			scheduleUpdate(2000);
 			retries--;
@@ -96,14 +241,87 @@
 		}
 
 		if (noList.length < 2) {
-			console.log('Too few markets.');
-			updateAnnotation('❓', 'Too few markets ' + max + '¢ or under to calculate negative risk.');
-			retries = 0;
+			updateAnnotation({
+				type: 'no',
+				status: STATUSES.unknown,
+				note: 'Too few markets ' + max + '¢ or under to calculate negative risk.'
+			});
+		}
+		if (yesList.length < 2) {
+			updateAnnotation({
+				type: 'yes',
+				status: STATUSES.unknown,
+				note: 'Too few markets ' + max + '¢ or under to calculate negative risk.'
+			});
+		}
+
+		if (noList.length < 2 && yesList.length < 2) {
+			scheduleUpdate(2000);
 			return;
 		}
 
-		var highestPotentialPercent;
-		var lowestPotentialPercent;
+		var i, status;
+		var highestPotentialPercent = null;
+		var lowestPotentialPercent = null;
+
+		///// PROCESS YES /////
+
+		// Iterate through each entry in the linked market and add them up.  This is the total
+		// spent.  Then iterate again, subtracting each entry from $1 to determine the profit
+		// and apply the 10% fee to it, to calculate gain.
+
+		var totalSpent = yesList.reduce(function(prev, current) {
+			return prev + current;
+		});
+		console.log('Yes total spent: $' + totalSpent);
+		for (i=0, len=yesList.length; i < len; i++) {
+			var entry = yesList[i];
+			var spent = totalSpent - entry;
+			var profit = ((1-entry)*.9) - spent;
+
+			var percentGainOrLoss = (profit * 100).toFixed(2);
+			if (percentGainOrLoss == -0) {
+				percentGainOrLoss = 0.00;
+			}
+
+			console.log("Yes " + (i+1) + "(" + yesList[i] + "):" + percentGainOrLoss + '%');
+
+			if (highestPotentialPercent == null) {
+				highestPotentialPercent = percentGainOrLoss;
+			} else if (percentGainOrLoss > highestPotentialPercent) {
+				highestPotentialPercent = percentGainOrLoss;
+			}
+
+			if (lowestPotentialPercent == null) {
+				lowestPotentialPercent = percentGainOrLoss;
+			} else if (percentGainOrLoss < lowestPotentialPercent) {
+				lowestPotentialPercent = percentGainOrLoss;
+			}
+		}
+
+		status = STATUSES.unknown;
+
+		if (lowestPotentialPercent >= great) {
+			status = STATUSES.great;
+		} else if (lowestPotentialPercent > 0) {
+			status = STATUSES.good;
+		} else if (highestPotentialPercent < 0) {
+			status = STATUSES.bad;
+		} else {
+			status = STATUSES.mixed;
+		}
+
+		updateAnnotation({
+			type: 'yes',
+			status: status,
+			low: lowestPotentialPercent,
+			high: highestPotentialPercent
+		});
+
+		///// PROCESS NO /////
+
+		highestPotentialPercent = null;
+		lowestPotentialPercent = null;
 
 		// Iterate through each entry in the linked market; this value will be treated as
 		// the "yes" (no payout) entry when adding up potential gains.
@@ -128,7 +346,7 @@
 				percentGainOrLoss = 0.00;
 			}
 
-			console.log("Item " + (i+1) + "(" + noList[i] + "):" + percentGainOrLoss + "%");
+			console.log("No " + (i+1) + "(" + noList[i] + "):" + percentGainOrLoss + "%");
 
 			if (highestPotentialPercent == null) {
 				highestPotentialPercent = percentGainOrLoss;
@@ -143,42 +361,27 @@
 			}
 		}
 
-		var icon, label, mouseover, text = '';
-		mouseover = 'Lowest Potential Gain: ' + lowestPotentialPercent + '%\nHighest Potential Gain: ' + highestPotentialPercent + '%';
+		status = STATUSES.unknown;
 
 		if (lowestPotentialPercent >= great) {
-			icon = '🤑';
-			label = 'Great bet!';
-			text += '🤑 Great bet!\n';
-			text += 'Lowest Potential Gain:' + lowestPotentialPercent + '%\n';
-			text += 'Highest Potential Gain:' + highestPotentialPercent + '%\n';
+			status = STATUSES.great;
 		} else if (lowestPotentialPercent > 0) {
-			icon = '✅';
-			label = 'Good bet!';
-			text += '✅ Good bet!\n';
-			text += 'Lowest Potential Gain:' + lowestPotentialPercent + '%\n';
-			text += 'Highest Potential Gain:' + highestPotentialPercent + '%\n';
+			status = STATUSES.good;
 		} else if (highestPotentialPercent < 0) {
-			icon = '❌';
-			label = 'Bad bet.';
-			mouseover = 'Lowest Potential Loss: ' + lowestPotentialPercent + '%\nHighest Potential Loss: ' + highestPotentialPercent + '%';
-			text += '❌ Bad bet. :(\n';
-			text += 'Lowest Potential Loss:' + lowestPotentialPercent + '%\n';
-			text += 'Highest Potential Loss:' + highestPotentialPercent + '%\n';
+			status = STATUSES.bad;
 		} else {
-			icon = '😐';
-			label = 'Mixed bet.';
-			mouseover = 'Lowest Potential Loss: ' + lowestPotentialPercent + '%\nHighest Potential Gain: ' + highestPotentialPercent + '%';
-			text += '😐 Mixed bet.\n';
-			text += 'Lowest Potential Loss:' + lowestPotentialPercent + '%\n';
-			text += 'Highest Potential Gain:' + highestPotentialPercent + '%\n';
+			status = STATUSES.mixed;
 		}
 
-		console.log(text);
-		updateAnnotation(icon, mouseover, label, text);
+		updateAnnotation({
+			type: 'no',
+			status: status,
+			low: lowestPotentialPercent,
+			high: highestPotentialPercent
+		});
 
-		chrome.storage.sync.get(default_options? default_options : {}, function(items) {
-			var refreshTime = parseInt(items.negativerisk_refresh, 10);
+		chrome.storage.sync.get(default_options? default_options : {}, function(options) {
+			var refreshTime = parseInt(options.negativerisk_refresh, 10);
 			if (!refreshTime || isNaN(refreshTime)) {
 				refreshTime = 10;
 			}
