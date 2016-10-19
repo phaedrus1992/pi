@@ -55,7 +55,7 @@ Initial Release
 Usage
 =====
 
-Browse to any linked Market page on PredictIt.  You will see one of three markers appear next to the "refresh" button:
+Browse to any linked Market page on PredictIt.  You will see one of five markers appear next to the "refresh" button:
 
 * ❓ = Too few markets to calculate negative risk.
 * ❌ = Bad Bet (there is no potential to make money by buying all shares)
