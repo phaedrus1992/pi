@@ -290,7 +290,7 @@
 			var spent = totalSpent - entry;
 			var profit = ((1-entry)*.9) - spent;
 
-			var percentGainOrLoss = (profit * 100).toFixed(2);
+			var percentGainOrLoss = profit * 100.0;
 			if (percentGainOrLoss == -0) {
 				percentGainOrLoss = 0.00;
 			}
@@ -325,8 +325,8 @@
 		updateAnnotation({
 			type: 'yes',
 			status: status,
-			low: lowestPotentialPercent,
-			high: highestPotentialPercent
+			low: lowestPotentialPercent.toFixed(2),
+			high: highestPotentialPercent.toFixed(2)
 		});
 
 		///// PROCESS NO /////
@@ -352,7 +352,7 @@
 			var realTotal = total - noList[i];
 
 			// calculate a percentage
-			var percentGainOrLoss = (realTotal*100).toFixed(2);
+			var percentGainOrLoss = realTotal*100.0;
 			if (percentGainOrLoss == -0) {
 				percentGainOrLoss = 0.00;
 			}
@@ -360,14 +360,18 @@
 			console.log("No " + (i+1) + "(" + noList[i] + "):" + percentGainOrLoss + "%");
 
 			if (highestPotentialPercent == null) {
+				//console.log('setting highest to ' + percentGainOrLoss);
 				highestPotentialPercent = percentGainOrLoss;
 			} else if (percentGainOrLoss > highestPotentialPercent) {
+				//console.log('replacing current highest (' + highestPotentialPercent + ') with ' + percentGainOrLoss)
 				highestPotentialPercent = percentGainOrLoss;
 			}
 
 			if (lowestPotentialPercent == null) {
+				//console.log('setting lowest to ' + percentGainOrLoss);
 				lowestPotentialPercent = percentGainOrLoss;
 			} else if (percentGainOrLoss < lowestPotentialPercent) {
+				//console.log('replacing current lowest (' + lowestPotentialPercent + ') with ' + percentGainOrLoss)
 				lowestPotentialPercent = percentGainOrLoss;
 			}
 		}
@@ -387,8 +391,8 @@
 		updateAnnotation({
 			type: 'no',
 			status: status,
-			low: lowestPotentialPercent,
-			high: highestPotentialPercent
+			low: lowestPotentialPercent.toFixed(2),
+			high: highestPotentialPercent.toFixed(2)
 		});
 
 		chrome.storage.sync.get(default_options || {}, function(options) {
