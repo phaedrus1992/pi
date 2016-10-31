@@ -86,16 +86,17 @@
 			var detailedAnnotation = $('#detailedAnnotation');
 
 			if (options.negativerisk_detailed) {
-				headerAnnotation.remove();
+				//headerAnnotation.remove();
 				if (!detailedAnnotation || detailedAnnotation.length === 0) {
-					$('#contractList div.panel.panel-default.activity').parent().before('<table id="detailedAnnotation"><tr><td id="detailedYes"></td><td>&nbsp;&nbsp;</td><td id="detailedNo"></td></tr></table>');
+					//$('#contractList div.panel.panel-default.activity').parent().before('<table id="detailedAnnotation"><tr><td id="detailedYes"></td><td>&nbsp;&nbsp;</td><td id="detailedNo"></td></tr></table>');
+					$('#contractList div.panel.panel-default.activity').parent().after('<table id="detailedAnnotation" name="detailedAnnotation"><tr><td id="detailedYes"></td><td>&nbsp;&nbsp;</td><td id="detailedNo"></td></tr></table>');
 				}
 			} else {
 				detailedAnnotation.remove();
-				var sharesHeader = $('#contractListTable .sharesHeader');
-				if (!headerAnnotation || headerAnnotation.length === 0) {
-					sharesHeader.find('a.glyphicons').after('<span id="headerAnnotation" style="cursor: pointer"><span id="headerYes" /> <span id="headerNo" /></span>');
-				}
+			}
+			var sharesHeader = $('#contractListTable .sharesHeader');
+			if (!headerAnnotation || headerAnnotation.length === 0) {
+				sharesHeader.find('a.glyphicons').after('<span id="headerAnnotation" style="cursor: pointer"><span id="headerYes" /> <span id="headerNo" /></span>');
 			}
 
 			var refreshElement = $('#contractListTable .sharesHeader a.glyphicons.refresh');
@@ -132,9 +133,8 @@
 				info.options = options;
 				if (options.negativerisk_detailed) {
 					updateDetailedAnnotation(info);
-				} else {
-					updateHeaderAnnotation(info);
 				}
+				updateHeaderAnnotation(info);
 			}
 			if (callback) { callback(options); }
 		});
