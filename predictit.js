@@ -210,6 +210,9 @@
 			if (!isNaN(price) && price <= max) {
 				yeses.push(price);
 				console.log('yes: ' + price);
+			} else if (upa.text() === 'None') {
+				console.log('yes: 100 (none)');
+				yeses.push(100.0);
 			} else {
 				console.log('yes did not match: ' + price);
 			}
