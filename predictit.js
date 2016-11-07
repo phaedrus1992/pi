@@ -19,49 +19,37 @@
 			icon: '❓',
 			bgcolor: '#777',
 			label: 'Unknown',
-			instruction: "Don't Buy",
-			lowLabel: 'Lowest Potential Loss',
-			highLabel: 'Highest Potential Loss'
+			instruction: "Don't Buy"
 		},
 		awful: {
 			icon: '💩',
 			bgcolor: '#bdb58e',
 			label: 'Awful',
-			instruction: "Don't Buy",
-			lowLabel: 'Lowest Potential Loss',
-			highLabel: 'Highest Potential Loss'
+			instruction: "Don't Buy"
 		},
 		bad: {
 			icon: '❌',
 			bgcolor: '#fdd',
 			label: 'Bad',
-			instruction: "Don't Buy",
-			lowLabel: 'Lowest Potential Loss',
-			highLabel: 'Highest Potential Loss'
+			instruction: "Don't Buy"
 		},
 		mixed: {
 			icon: '😐',
 			bgcolor: 'white',
 			label: 'Mixed',
-			instruction: "Don't Buy",
-			lowLabel: 'Lowest Potential Loss',
-			highLabel: 'Highest Potential Gain'
+			instruction: "Don't Buy"
 		},
 		good: {
 			icon: '✅',
 			bgcolor: '#93d591',
 			label: 'Good',
-			instruction: "Buy",
-			lowLabel: 'Lowest Potential Gain',
-			highLabel: 'Highest Potential Gain'
+			instruction: "Buy"
 		},
 		great: {
 			icon: '🤑',
 			bgcolor: '#6dd56a',
 			label: 'Great',
-			instruction: "Buy",
-			lowLabel: 'Lowest Potential Gain',
-			highLabel: 'Highest Potential Gain'
+			instruction: "Buy"
 		}
 	};
 
@@ -153,9 +141,9 @@
 			el.html('&nbsp;<span style="color:#777">' + typeDisplay + ':</span>&nbsp;' + info.status.icon + '&nbsp;');
 
 			var mouseover = info.status.instruction + ' ' + typeDisplay + '\n';
-			mouseover += info.status.lowLabel + ': ' + info.low + '%\n';
-			mouseover += info.status.highLabel + ': ' + info.high + '%\n';
-			mouseover += 'Average: ' + info.average + '%';
+			mouseover += 'Worst Potential Change: ' + info.low + '%\n';
+			mouseover += 'Best Potential Change: ' + info.high + '%\n';
+			mouseover += 'Average Potential Change: ' + info.average + '%';
 
 			el.attr('title', mouseover);
 		});
@@ -170,15 +158,15 @@
 			var detail = '<table style="border:0;margin:0 5px;background-color:' + info.status.bgcolor + '">' +
 				'<tr>' +
 					'<td rowspan="3" style="font-size:150%;padding:1px 8px">' + info.status.icon + ' ' + info.status.instruction + ' ' + colorize(info.type, typeDisplay) + '</td>' +
-					'<td style="padding:1px 5px">' + info.status.lowLabel + ':' + '</td>' +
+					'<td style="padding:1px 5px">Worst Potential Change:' + '</td>' +
 					'<td style="padding:1px 5px;text-align:right">' + info.low + '%</td>' +
 				'</tr>' +
 				'<tr>' +
-					'<td style="padding:1px 5px">' + info.status.highLabel + ':' + '</td>' +
+					'<td style="padding:1px 5px">Best Potential Change:' + '</td>' +
 					'<td style="padding:1px 5px;text-align:right">' + info.high + '%</td>' +
 				'</tr>' +
 				'<tr>' +
-					'<td style="padding:1px 5px">Average:' + '</td>' +
+					'<td style="padding:1px 5px">Average Potential Change:' + '</td>' +
 					'<td style="padding:1px 5px;text-align:right">' + info.average + '%</td>' +
 				'</tr>' +
 			'</table>';
@@ -327,18 +315,20 @@
 
 		status = STATUSES.unknown;
 
+		average = (totalPercent / yeses.length).toFixed(2);
+		console.log('Yes average: ' + average + '%');
+
 		if (lowestPotentialPercent >= great) {
 			status = STATUSES.great;
 		} else if (lowestPotentialPercent > 0) {
 			status = STATUSES.good;
 		} else if (highestPotentialPercent < 0) {
 			status = STATUSES.bad;
+		} else if (average < 0) {
+			status = STATUSES.bad;
 		} else {
 			status = STATUSES.mixed;
 		}
-
-		average = (totalPercent / yeses.length).toFixed(2);
-		console.log('Yes average: ' + average + '%');
 
 		updateAnnotation({
 			type: 'yes',
@@ -404,18 +394,20 @@
 
 		status = STATUSES.unknown;
 
+		average = (totalPercent / yeses.length).toFixed(2);
+		console.log('No average: ' + average + '%');
+
 		if (lowestPotentialPercent >= great) {
 			status = STATUSES.great;
 		} else if (lowestPotentialPercent > 0) {
 			status = STATUSES.good;
 		} else if (highestPotentialPercent < 0) {
 			status = STATUSES.bad;
+		} else if (average < 0) {
+			status = STATUSES.bad;
 		} else {
 			status = STATUSES.mixed;
 		}
-
-		average = (totalPercent / yeses.length).toFixed(2);
-		console.log('No average: ' + average + '%');
 
 		updateAnnotation({
 			type: 'no',
