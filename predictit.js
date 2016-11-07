@@ -154,7 +154,8 @@
 
 			var mouseover = info.status.instruction + ' ' + typeDisplay + '\n';
 			mouseover += info.status.lowLabel + ': ' + info.low + '%\n';
-			mouseover += info.status.highLabel + ': ' + info.high + '%';
+			mouseover += info.status.highLabel + ': ' + info.high + '%\n';
+			mouseover += 'Average: ' + info.average + '%';
 
 			el.attr('title', mouseover);
 		});
@@ -168,13 +169,17 @@
 
 			var detail = '<table style="border:0;margin:0 5px;background-color:' + info.status.bgcolor + '">' +
 				'<tr>' +
-					'<td rowspan="2" style="font-size:150%;padding:1px 8px">' + info.status.icon + ' ' + info.status.instruction + ' ' + colorize(info.type, typeDisplay) + '</td>' +
+					'<td rowspan="3" style="font-size:150%;padding:1px 8px">' + info.status.icon + ' ' + info.status.instruction + ' ' + colorize(info.type, typeDisplay) + '</td>' +
 					'<td style="padding:1px 5px">' + info.status.lowLabel + ':' + '</td>' +
 					'<td style="padding:1px 5px;text-align:right">' + info.low + '%</td>' +
 				'</tr>' +
 				'<tr>' +
 					'<td style="padding:1px 5px">' + info.status.highLabel + ':' + '</td>' +
 					'<td style="padding:1px 5px;text-align:right">' + info.high + '%</td>' +
+				'</tr>' +
+				'<tr>' +
+					'<td style="padding:1px 5px">Average:' + '</td>' +
+					'<td style="padding:1px 5px;text-align:right">' + info.average + '%</td>' +
 				'</tr>' +
 			'</table>';
 
@@ -274,9 +279,10 @@
 			return;
 		}
 
-		var i, status;
+		var i, status, average;
 		var highestPotentialPercent = null;
 		var lowestPotentialPercent = null;
+		var totalPercent = null;
 
 		///// PROCESS YES /////
 
@@ -299,6 +305,12 @@
 			}
 
 			console.log("Yes " + (i+1) + "(" + yesList[i] + "):" + percentGainOrLoss + '%');
+
+			if (totalPercent == null) {
+				totalPercent = percentGainOrLoss;
+			} else {
+				totalPercent += percentGainOrLoss;
+			}
 
 			if (highestPotentialPercent == null) {
 				highestPotentialPercent = percentGainOrLoss;
@@ -325,9 +337,13 @@
 			status = STATUSES.mixed;
 		}
 
+		average = (totalPercent / yeses.length).toFixed(2);
+		console.log('Yes average: ' + average + '%');
+
 		updateAnnotation({
 			type: 'yes',
 			status: status,
+			average: average,
 			low: lowestPotentialPercent.toFixed(2),
 			high: highestPotentialPercent.toFixed(2)
 		});
@@ -336,6 +352,7 @@
 
 		highestPotentialPercent = null;
 		lowestPotentialPercent = null;
+		totalPercent = null;
 
 		// Iterate through each entry in the linked market; this value will be treated as
 		// the "yes" (no payout) entry when adding up potential gains.
@@ -361,6 +378,12 @@
 			}
 
 			console.log("No " + (i+1) + "(" + noList[i] + "):" + percentGainOrLoss + "%");
+
+			if (totalPercent == null) {
+				totalPercent = percentGainOrLoss;
+			} else {
+				totalPercent += percentGainOrLoss;
+			}
 
 			if (highestPotentialPercent == null) {
 				//console.log('setting highest to ' + percentGainOrLoss);
@@ -391,9 +414,13 @@
 			status = STATUSES.mixed;
 		}
 
+		average = (totalPercent / yeses.length).toFixed(2);
+		console.log('No average: ' + average + '%');
+
 		updateAnnotation({
 			type: 'no',
 			status: status,
+			average: average,
 			low: lowestPotentialPercent.toFixed(2),
 			high: highestPotentialPercent.toFixed(2)
 		});
