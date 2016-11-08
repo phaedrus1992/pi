@@ -26,6 +26,13 @@ Installation
 Version History
 ===============
 
+0.4
+---
+
+* Treat "None" as $1 when doing the math on the viability of a linked market. This keeps almost-resolved markets from appearing "Great".
+* Add "Average" to the gain/loss summary, to help get a better idea of the spread of the gains or losses.
+* Mixed (😐) bets now only show as mixed if the average is greater than 0.  Otherwise they show as bad (❌).
+
 0.3
 ---
 
@@ -58,7 +65,7 @@ Usage
 Browse to any linked Market page on PredictIt.  You will see one of five markers appear next to the "refresh" button:
 
 * ❓ = Too few markets to calculate negative risk.
-* ❌ = Bad Bet (there is no potential to make money by buying all shares)
+* ❌ = Bad Bet (there is no potential -- or almost no potential -- to make money by buying all shares)
 * 😐 = Mixed Bet (it is possible to gain or lose money depending on the outcome)
 * ✅ = Good Bet (no matter the outcome, you should make money)
 * 🤑 = Great Bet (based on a configurable threshold)

@@ -3,7 +3,7 @@
 
   "name": "Negative Risk Extension",
   "description": "This extension will display whether it is a good time to purchase shares with negative risk.",
-  "version": "0.3",
+  "version": "0.4",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
