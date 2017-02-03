@@ -16,37 +16,49 @@
 
 	const STATUSES = {
 		unknown: {
+			value: 1,
 			icon: '❓',
+			image: 'question.png',
 			bgcolor: '#777',
 			label: 'Unknown',
 			instruction: "Don't Buy"
 		},
 		awful: {
+			value: 2,
 			icon: '💩',
+			image: 'poop.png',
 			bgcolor: '#bdb58e',
 			label: 'Awful',
 			instruction: "Don't Buy"
 		},
 		bad: {
+			value: 3,
 			icon: '❌',
+			image: 'cross-mark.png',
 			bgcolor: '#fdd',
 			label: 'Bad',
 			instruction: "Don't Buy"
 		},
 		mixed: {
+			value: 4,
 			icon: '😐',
+			image: 'neutral-face.png',
 			bgcolor: 'white',
 			label: 'Mixed',
 			instruction: "Don't Buy"
 		},
 		good: {
+			value: 5,
 			icon: '✅',
+			image: 'check-mark.png',
 			bgcolor: '#93d591',
 			label: 'Good',
 			instruction: "Buy"
 		},
 		great: {
+			value: 6,
 			icon: '🤑',
+			image: 'money-face.png',
 			bgcolor: '#6dd56a',
 			label: 'Great',
 			instruction: "Buy"
@@ -126,6 +138,54 @@
 			}
 			if (callback) { callback(options); }
 		});
+	}
+
+	function getValue(status) {
+		if (status && status.value > 0) {
+			return status.value;
+		}
+		return 0;
+	}
+
+	function updateTitle(statuses) {
+		console.log('updateTitle:',statuses);
+
+		var el = document.querySelectorAll('head link[rel*="icon"]');
+
+		// Remove existing favicons
+		Array.prototype.forEach.call(el, function (node) {
+		    node.parentNode.removeChild(node);
+		});
+
+		var icon;
+		if (getValue(statuses.yes) > getValue(statuses.no)) {
+			icon = statuses.yes.image;
+		} else {
+			icon = statuses.no.image;
+		}
+
+		icon = chrome.extension.getURL('/img/' + icon);
+
+		// Create new favicon
+		link      = document.createElement('link');
+		link.type = 'image/x-icon';
+		link.rel  = 'icon';
+		link.href = icon;
+
+		document.getElementsByTagName('head')[0].appendChild(link);
+
+		/*
+		var title = document.title;
+		if (title.indexOf('PredictIt') > 0) {
+			title = title.substring(2);
+		}
+		if (getValue(statuses.yes) > getValue(statuses.no)) {
+			title = statuses.yes.icon + ' ' + title;
+		} else if (statuses.no && statuses.no.icon) {
+			title = statuses.no.icon + ' ' + title;
+		}
+		document.title = title;
+		*/
 	}
 
 	function colorize(type, text) {
@@ -267,7 +327,7 @@
 			return;
 		}
 
-		var i, status, average;
+		var i, yesStatus, noStatus, average;
 		var highestPotentialPercent = null;
 		var lowestPotentialPercent = null;
 		var totalPercent = null;
@@ -313,26 +373,26 @@
 			}
 		}
 
-		status = STATUSES.unknown;
+		yesStatus = STATUSES.unknown;
 
 		average = (totalPercent / yeses.length).toFixed(2);
 		console.log('Yes average: ' + average + '%');
 
 		if (lowestPotentialPercent >= great) {
-			status = STATUSES.great;
+			yesStatus = STATUSES.great;
 		} else if (lowestPotentialPercent > 0) {
-			status = STATUSES.good;
+			yesStatus = STATUSES.good;
 		} else if (highestPotentialPercent < 0) {
-			status = STATUSES.bad;
+			yesStatus = STATUSES.bad;
 		} else if (average < 0) {
-			status = STATUSES.bad;
+			yesStatus = STATUSES.bad;
 		} else {
-			status = STATUSES.mixed;
+			yesStatus = STATUSES.mixed;
 		}
 
 		updateAnnotation({
 			type: 'yes',
-			status: status,
+			status: yesStatus,
 			average: average,
 			low: lowestPotentialPercent.toFixed(2),
 			high: highestPotentialPercent.toFixed(2)
@@ -392,29 +452,34 @@
 			}
 		}
 
-		status = STATUSES.unknown;
+		noStatus = STATUSES.unknown;
 
 		average = (totalPercent / yeses.length).toFixed(2);
 		console.log('No average: ' + average + '%');
 
 		if (lowestPotentialPercent >= great) {
-			status = STATUSES.great;
+			noStatus = STATUSES.great;
 		} else if (lowestPotentialPercent > 0) {
-			status = STATUSES.good;
+			noStatus = STATUSES.good;
 		} else if (highestPotentialPercent < 0) {
-			status = STATUSES.bad;
+			noStatus = STATUSES.bad;
 		} else if (average < 0) {
-			status = STATUSES.bad;
+			noStatus = STATUSES.bad;
 		} else {
-			status = STATUSES.mixed;
+			noStatus = STATUSES.mixed;
 		}
 
 		updateAnnotation({
 			type: 'no',
-			status: status,
+			status: noStatus,
 			average: average,
 			low: lowestPotentialPercent.toFixed(2),
 			high: highestPotentialPercent.toFixed(2)
+		});
+
+		updateTitle({
+			yes: yesStatus,
+			no: noStatus
 		});
 
 		chrome.storage.sync.get(default_options || {}, function(options) {
