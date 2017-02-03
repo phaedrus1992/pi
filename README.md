@@ -26,6 +26,12 @@ Installation
 Version History
 ===============
 
+0.5
+---
+
+* Fix PredictIt change to predictit.com
+* Show market status in tab icon
+
 0.4
 ---
 
