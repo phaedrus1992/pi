@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 (function (w) {
 	var retries = 4;
 	var schedule;
@@ -150,14 +152,13 @@
 	function updateTitle(statuses) {
 		console.log('updateTitle:',statuses);
 
-		var el = document.querySelectorAll('head link[rel*="icon"]');
+		var icon, link, el = document.querySelectorAll('head link[rel*="icon"]');
 
 		// Remove existing favicons
 		Array.prototype.forEach.call(el, function (node) {
 		    node.parentNode.removeChild(node);
 		});
 
-		var icon;
 		if (getValue(statuses.yes) > getValue(statuses.no)) {
 			icon = statuses.yes.image;
 		} else {
@@ -327,7 +328,7 @@
 			return;
 		}
 
-		var i, yesStatus, noStatus, average;
+		var i, j, len, yesStatus, noStatus, average;
 		var highestPotentialPercent = null;
 		var lowestPotentialPercent = null;
 		var totalPercent = null;

@@ -1,1 +1,4 @@
 .DS_Store
+options.js
+predictit.js
+node_modules

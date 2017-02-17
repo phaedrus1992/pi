@@ -1,0 +1,12 @@
+{
+    "Contracts": [
+        {
+            "BestBuyYesCost": 0.99,
+            "BestBuyNoCost": 0.99,
+            "ID": 2,
+            "Name": "B1"
+        }
+    ],
+    "ID": 1,
+    "Name": "Aggregate Unknown"
+}

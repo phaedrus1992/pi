@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 var default_options = {
 	negativerisk_maxprice: 97,
 	negativerisk_refresh: 10,
