@@ -1,10 +1,13 @@
 import {Market} from './Market';
 import cloneDeep from 'lodash.clonedeep';
 
+import * as Constants from './Constants';
+
 export class MarketTracker {
 	constructor(refreshInterval=60000) {
 		this.setRefreshInterval(refreshInterval);
 		this.subscriptions = [];
+		this.ignored = [];
 	}
 
 	setRefreshInterval(refreshInterval) {
@@ -18,7 +21,9 @@ export class MarketTracker {
 		let doRefresh = () => {
 			this.refreshMarkets().then((m) => {
 				console.log('got ' + m.length + ' markets');
-				self.markets = m;
+				self.markets = m.filter((market) => {
+					return self.ignored.indexOf(market.ID) < 0;
+				});
 				self.onUpdate();
 			}).catch((err) => {
 				console.error('Failed to refresh markets: ' + err);
@@ -45,6 +50,30 @@ export class MarketTracker {
 	unsubscribe(callback) {
 		if (this.subscriptions.includes(callback)) {
 			this.subscriptions.splice(this.subscriptions.indexOf(callback), 1);
+		}
+	}
+
+	ignore(market) {
+		if (Number.isInteger(market)) {
+			this.ignored.push(market);
+			if (Constants.DEBUG) { console.log('Ignored market: ' + market); }
+		} else if (market && market.ID && Number.isInteger(market.ID)) {
+			this.ignored.push(market.ID);
+			if (Constants.DEBUG) { console.log('Ignored market: ' + market.ID); }
+		} else {
+			console.warn('Not sure how to ignore market:', market);
+		}
+	}
+
+	unignore(market) {
+		if (Number.isInteger(market)) {
+			this.ignored.splice(this.ignored.indexOf(market), 1);
+			if (Constants.DEBUG) { console.log('Unignored market: ' + market); }
+		} else if (market && market.ID && Number.isInteger(market.ID)) {
+			this.ignored.splice(this.ignored.indexOf(market.ID), 1);
+			if (Constants.DEBUG) { console.log('Unignored market: ' + market.ID); }
+		} else {
+			console.warn('Not sure how to unignore market:', market);
 		}
 	}
 
