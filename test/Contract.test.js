@@ -3,6 +3,13 @@ import * as assert from 'assert';
 
 import {Contract} from '../src/Contract';
 
+import {LoadLong} from '../data/LoadLong.js';
+import {LoadShort} from '../data/LoadShort.js';
+
+import jsdom from 'jsdom';
+global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
+global.window = document.defaultView;
+
 describe('Contract', () => {
 	describe('constructor()', () => {
 		it('should create a Contract object', () => {
@@ -27,4 +34,25 @@ describe('Contract', () => {
 			assert.equal(0.08, c.BestBuyNoCost);
 		});
 	});
+
+	describe('#_importLoadLong', () => {
+		it('should parse an AJAX "LoadLong" response correctly', () => {
+			assert.ok(LoadLong.length > 0);
+			let m = new Contract();
+			assert.ok(m._importLoadLong(LoadLong));
+			assert.equal(5, m.BestBuyYesQuantity);
+			assert.equal(0.18, m.BestBuyYesCost);
+		});
+	});
+
+	describe('#_importLoadShort', () => {
+		it('should parse an AJAX "LoadShort" response correctly', () => {
+			assert.ok(LoadShort.length > 0);
+			let m = new Contract();
+			assert.ok(m._importLoadShort(LoadShort));
+			assert.equal(500, m.BestBuyNoQuantity);
+			assert.equal(0.94, m.BestBuyNoCost);
+		});
+	});
+
 });

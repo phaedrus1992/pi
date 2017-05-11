@@ -1,3 +1,5 @@
+import median from 'median';
+
 import {Contract} from './Contract';
 import {Quality} from './Quality';
 import {Status} from './Status';
@@ -12,8 +14,114 @@ export class Market {
 		}
 	}
 
+	allowNull(an) {
+		if (typeof an === 'boolean') {
+			this._allowNull = an;
+		}
+		return this._allowNull;
+	}
+
 	isLinked() {
 		return this.Contracts.length >= 2;
+	}
+
+	refreshLong() {
+		return Promise.all(this.Contracts.map((c) => {
+			return c.loadLong();
+		}));
+	}
+
+	refreshShort() {
+		return Promise.all(this.Contracts.map((c) => {
+			return c.loadShort();
+		}));
+	}
+
+	refreshContracts() {
+		const self = this;
+		return self.refreshLong().then(() => {
+			return self.refreshShort();
+		});
+	}
+
+	getYesValues() {
+		return this.Contracts.map((c) => {
+			return c.BestBuyYesCost;
+		});
+	}
+
+	getNoValues() {
+		return this.Contracts.map((c) => {
+			return c.BestBuyNoCost;
+		});
+	}
+
+	getYesSharesToBuy() {
+		let quantity = this.Contracts.map((c) => {
+			return c.BestBuyYesQuantity || NaN;
+		});
+		return Math.min.apply(Math, quantity);
+	}
+
+	getNoSharesToBuy() {
+		let quantity = this.Contracts.map((c) => {
+			return c.BestBuyNoQuantity || 0;
+		});
+		return Math.min.apply(Math, quantity);
+	}
+
+	isResolving() {
+		if (this.isLinked()) {
+			let yeses = this.getYesValues();
+			let min = Math.min.apply(null, yeses);
+			let max = Math.max.apply(null, yeses);
+			let m = median(yeses);
+
+			if (m < 0.10 && max >= 0.90) {
+				return !this.isResolved();
+			} else {
+				return false;
+			}
+		}
+		return undefined;
+	}
+
+	isResolved() {
+		if (this.isLinked()) {
+			let yeses = this.getYesValues();
+			let min = Math.min.apply(null, yeses);
+			let max = Math.max.apply(null, yeses);
+			let m = median(yeses);
+			if (m == 0.01 && this.Contracts[0].BestBuyYesCost === null || this.Contracts[this.Contracts.length - 1] == null) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			if (this.Contracts[0].BestSellYesCost == null || this.Contracts[0].BestSellNoCost == null) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	iconStatus() {
+		let yes = this.yesQuality();
+		let no = this.noQuality();
+		return yes.status.icon + ' ' + no.status.icon;
+	}
+
+	shortStatusText() {
+		let yes = this.yesQuality();
+		let no = this.noQuality();
+		return yes.status.icon + ' ' + no.status.icon + ' ' + this.Name;
+	}
+
+	longStatusText() {
+		let yes = this.yesQuality();
+		let no = this.noQuality();
+		return this.Name + '\n' + yes.status.instruction + ' Yes / ' + no.status.instruction + ' No';
 	}
 
 	aggregateStatusValue() {
@@ -33,9 +141,17 @@ export class Market {
 		});
 		if (Constants.DEBUG) { console.log('Yes costs: ',costs); }
 
-		let totalSpent = costs.includes(null)? NaN : costs.reduce((prev,current) => {
-			return prev + current;
-		});
+		let totalSpent = -1;
+		if (this.allowNull()) {
+			totalSpent = costs.reduce((prev,current) => {
+				current = current || 1;
+				return prev + current;
+			});
+		} else {
+			totalSpent = costs.includes(null)? NaN : costs.reduce((prev,current) => {
+				return prev + current;
+			});
+		}
 
 		if (Constants.DEBUG) { console.log('Yes total spent: $' + totalSpent.toFixed(2)); }
 
@@ -51,6 +167,9 @@ export class Market {
 
 		for (let contract of this.Contracts) {
 			let cost = contract.BestBuyYesCost;
+			if (cost === null || cost === undefined) {
+				cost = 1.0;
+			}
 
 			let spent = totalSpent - cost;
 			let profit = ((1-cost)*.9) - spent;
@@ -91,9 +210,17 @@ export class Market {
 		});
 		if (Constants.DEBUG) { console.log('No costs: ',costs); }
 
-		let totalSpent = costs.includes(null)? NaN : costs.reduce((prev,current) => {
-			return prev + current;
-		});
+		let totalSpent = 0;
+		if (this.allowNull()) {
+			totalSpent = costs.reduce((prev,current) => {
+				current = current || 1;
+				return prev + current;
+			});
+		} else {
+			totalSpent = costs.includes(null)? NaN : costs.reduce((prev,current) => {
+				return prev + current;
+			});
+		}
 
 		if (Constants.DEBUG) { console.log('No total spent: $' + totalSpent.toFixed(2)); }
 

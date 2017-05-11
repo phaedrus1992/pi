@@ -1,0 +1,40 @@
+body {
+  width: 780px;
+  height: 580px;
+  margin: 0;
+  padding: 0; }
+
+td {
+  margin: 0;
+  padding: 5px;
+  border-top: 1px solid black; }
+
+.status-link {
+  margin: auto;
+  text-align: center; }
+
+.status-icon {
+  width: 32px;
+  height: 32px; }
+
+a {
+  color: black;
+  text-decoration: none; }
+
+.status-Unknown {
+  background-color: #444444; }
+
+.status-Awful {
+  background-color: #918654; }
+
+.status-Bad {
+  background-color: #ff7777; }
+
+.status-Mixed {
+  background-color: #cccccc; }
+
+.status-Good {
+  background-color: #4bb947; }
+
+.status-Great {
+  background-color: #33a930; }

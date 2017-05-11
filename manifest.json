@@ -16,6 +16,7 @@
   "browser_action": {
     "name": "PredictIt Status",
     "default_title": "PredictIt",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icon16.png",
       "24": "icon24.png",
@@ -46,11 +47,13 @@
   },
 
   "web_accessible_resources": [
+    "*.css",
     "img/*.png"
   ],
 
   "permissions": [
     "storage",
+    "notifications",
     "activeTab",
     "https://predictit.com/",
     "https://www.predictit.org/"

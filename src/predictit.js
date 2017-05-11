@@ -1,5 +1,7 @@
 import 'babel-polyfill';
 
+import {Market} from './Market';
+
 (function (w) {
 	var retries = 4;
 	var schedule;

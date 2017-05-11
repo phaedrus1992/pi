@@ -6,6 +6,10 @@ import {Quality} from '../src/Quality';
 import {Status} from '../src/Status';
 import {Market} from '../src/Market';
 
+import jsdom from 'jsdom';
+global.document = jsdom.jsdom('<!doctype html><html><body></body></html>');
+global.window = document.defaultView;
+
 /*
 import * as goodNoMarket from './data/no-good.json';
 import * as questionableNoMarket from './data/no-questionable.json';
@@ -130,6 +134,14 @@ describe('Market', () => {
 			let m = new Market(Constants.AGGREGATE_AA);
 			assert.equal(4, m.aggregateStatusValue());
 		});
-
 	});
+
+	/*
+	describe('#fromContractListHtml', () => {
+		it('should parse an AJAX response correctly', () => {
+			assert.ok(template.length > 0);
+			let m = Market.fromContractListHtml(template);
+		});
+	});
+	*/
 });

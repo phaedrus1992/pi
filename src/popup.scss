@@ -1,0 +1,59 @@
+body {
+	width: 780px;
+	height: 580px;
+	margin: 0;
+	padding: 0;
+}
+
+td {
+	margin: 0;
+	padding: 5px;
+	border-top: 1px solid black;
+}
+
+tr {
+}
+
+.status-link {
+	margin: auto;
+	text-align: center;
+}
+
+.status-icon {
+	width: 32px;
+	height: 32px;
+}
+
+a {
+	color: black;
+	text-decoration: none;
+}
+
+$list-background-transparency: 1.0;
+$darken-amount: 20%;
+
+$status-color-UNKNOWN: #777;
+$status-color-AWFUL: #bdb58e;
+$status-color-BAD: #fdd;
+$status-color-MIXED: white;
+$status-color-GOOD: #93d591;
+$status-color-GREAT: #6dd56a;
+
+.status-Unknown {
+	background-color: darken(rgba($status-color-UNKNOWN, $list-background-transparency), $darken-amount);
+}
+.status-Awful {
+	background-color: darken(rgba($status-color-AWFUL, $list-background-transparency), $darken-amount);
+}
+.status-Bad {
+	background-color: darken(rgba($status-color-BAD, $list-background-transparency), $darken-amount);
+}
+.status-Mixed {
+	background-color: darken(rgba($status-color-MIXED, $list-background-transparency), $darken-amount);
+}
+.status-Good {
+	background-color: darken(rgba($status-color-GOOD, $list-background-transparency), $darken-amount);
+}
+.status-Great {
+	background-color: darken(rgba($status-color-GREAT, $list-background-transparency), $darken-amount);
+}
